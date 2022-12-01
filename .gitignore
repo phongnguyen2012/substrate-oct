@@ -28,3 +28,4 @@ coverage
 
 # direnv cache
 **/.direnv
+**/class2

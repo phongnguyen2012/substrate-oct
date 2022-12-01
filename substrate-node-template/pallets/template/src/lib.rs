@@ -16,7 +16,7 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use frame_support::{pallet_prelude::{*, ValueQuery}, Blake2_128Concat};
+	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::pallet]
@@ -38,15 +38,6 @@ pub mod pallet {
 	// https://docs.substrate.io/main-docs/build/runtime-storage/#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
-	#[pallet::storage]
-	#[pallet::getter(fn number)]
-
-	pub type Number<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId ,u32, ValueQuery>;
-
-	// // get number
-	// #[pallet::storage]
-	// #[pallet::getter(fn getnumber)]
-	// pub type GetNumber<T: Config> = StorageValue<_, u32, ValueQuery>;
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/main-docs/build/events-errors/
 	#[pallet::event]
@@ -54,8 +45,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
-		SomethingStored(u32, T::AccountId),
-
+		SomethingStored { something: u32, who: T::AccountId },
 	}
 
 	// Errors inform users that something went wrong.
@@ -65,7 +55,6 @@ pub mod pallet {
 		NoneValue,
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
-		NoneNumber,
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -86,43 +75,10 @@ pub mod pallet {
 			<Something<T>>::put(something);
 
 			// Emit an event.
-			Self::deposit_event(Event::SomethingStored(something, who));
+			Self::deposit_event(Event::SomethingStored { something, who });
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn put_number(origin: OriginFor<T>, number: u32) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			<Number<T>>::insert(who.clone(), number);
-			Self::deposit_event(Event::SomethingStored(number, who));
-			Ok(())
-		}
-		//remove number
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn remove_number(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			<Number<T>>::remove(who.clone());
-			// Self::deposit_event(Event::SomethingStored(0, who));
-			Ok(())
-		}
-		//update number
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn update_number(origin: OriginFor<T>, number: u32) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			<Number<T>>::mutate(who.clone(), |n| *n += number);
-			Self::deposit_event(Event::SomethingStored(number, who));
-			Ok(())
-		}
-		// //get number
-		// #[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		// pub fn get_number(origin: OriginFor<T>) -> DispatchResult {
-		// 	let who = ensure_signed(origin)?;
-		// 	let number = <Number<T>>::get(who.clone());
-		// 	<GetNumber<T>>::put(number.clone());
-		// 	Self::deposit_event(Event::SomethingStored(number, who));
-		// 	Ok(())
-		// }
-		
 
 		/// An example dispatchable that may throw a custom error.
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1).ref_time())]

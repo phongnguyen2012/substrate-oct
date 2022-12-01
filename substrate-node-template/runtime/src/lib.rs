@@ -47,6 +47,8 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
 pub use pallet_template;
+pub use pallet_demo;
+pub use pallet_kitty;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -277,6 +279,13 @@ impl pallet_sudo::Config for Runtime {
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+impl pallet_kitty::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+}
+
+impl pallet_demo::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -296,6 +305,8 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		Demo: pallet_demo,
+		Kitty: pallet_kitty,
 	}
 );
 
@@ -343,6 +354,7 @@ mod benches {
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_template, TemplateModule]
+		[pallet_demo, Demo]
 	);
 }
 
