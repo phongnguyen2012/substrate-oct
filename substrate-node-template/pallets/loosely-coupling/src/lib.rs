@@ -19,6 +19,7 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use pallet_template::{DoSomething};
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -29,15 +30,16 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type IncreaseValue: DoSomething;
 	}
 
 	// The pallet's runtime storage items.
 	// https://docs.substrate.io/main-docs/build/runtime-storage/
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
+	#[pallet::getter(fn someloosely)]
 	// Learn more about declaring storage items:
 	// https://docs.substrate.io/main-docs/build/runtime-storage/#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+	pub type Someloosely<T> = StorageValue<_, u32>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/main-docs/build/events-errors/
@@ -46,7 +48,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
-		SomethingStored { something: u32, who: T::AccountId },
+		IncreaseValue(u32),
 	}
 
 	// Errors inform users that something went wrong.
@@ -66,18 +68,12 @@ pub mod pallet {
 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
-			// This function will return an error if the extrinsic is not signed.
-			// https://docs.substrate.io/main-docs/build/origins/
-			let who = ensure_signed(origin)?;
-
-			// Update storage.
-			<Something<T>>::put(something);
-
-			// Emit an event.
-			Self::deposit_event(Event::SomethingStored { something, who });
-			// Return a successful DispatchResultWithPostInfo
+		pub fn increase_value(origin: OriginFor<T>, value: u32) -> DispatchResult {
+			let _ = ensure_signed(origin)?;
+		
+			let data = T::IncreaseValue::increase_value(value);
+			Someloosely::<T>::put(data);
+			Self::deposit_event(Event::IncreaseValue(data.clone()));
 			Ok(())
 		}
 
@@ -86,47 +82,13 @@ pub mod pallet {
 		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
 			let _who = ensure_signed(origin)?;
 
-			// Read a value from storage.
-			match <Something<T>>::get() {
-				// Return an error if the value has not been set.
-				None => return Err(Error::<T>::NoneValue.into()),
-				Some(old) => {
-					// Increment the value read from storage; will error in the event of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					<Something<T>>::put(new);
+			
 					Ok(())
-				},
-			}
+				
+			
 		}
 	}
 }
-//use tighly coupling pallets
-impl <T: Config> Pallet<T> {
-	// Public immutables can be declared in the pallet implementation block.
-	// This allows other pallets to query the state of the pallet.
-	pub fn is_something(something: u32) -> bool {
-		<Something<T>>::get().is_some()
-	}
-	pub fn update_storage(new_value: u32) -> DispatchResult {
-		Something::<T>::put(new_value);
-		Ok(())
-	}
-}
-//use loosely coupling pallets
-pub trait DoSomething {
-	fn increase_value(value: u32) -> u32;
-} 
-impl <T: Config> DoSomething for Pallet<T> {
-	fn increase_value(value: u32) -> u32 {
-		
-		let old = <Something<T>>::get().unwrap_or(0);
-		let new = old.checked_add(value).unwrap_or(0);
-		<Something<T>>::put(new);
-		new
-		
-	}
-}
-	
-	
+
+
 

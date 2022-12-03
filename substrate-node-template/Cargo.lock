@@ -3718,9 +3718,11 @@ dependencies = [
  "pallet-demo",
  "pallet-grandpa",
  "pallet-kitty",
+ "pallet-loosely-coupling",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-template",
+ "pallet-tightly-coupling",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -3980,6 +3982,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-loosely-coupling"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-template",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-randomness-collective-flip"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
@@ -4035,6 +4052,21 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
+name = "pallet-tightly-coupling"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-template",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
