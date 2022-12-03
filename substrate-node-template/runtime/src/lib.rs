@@ -50,6 +50,7 @@ pub use sp_runtime::{Perbill, Permill};
 pub use pallet_template;
 pub use pallet_demo;
 pub use pallet_kitty;
+pub use pallet_kitty2;
 // pub use pallet_tightly_coupling;
 
 /// An index to a block.
@@ -285,6 +286,11 @@ impl pallet_template::Config for Runtime {
 impl pallet_kitty::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+impl pallet_kitty2::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	//create_date kitty2
+	type CreateKitty = Timestamp;
+}
 
 impl pallet_demo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -318,6 +324,7 @@ construct_runtime!(
 		Kitty: pallet_kitty,
 		TightlyCoupling: pallet_tightly_coupling,
 		LooselyCoupling: pallet_loosely_coupling,
+		Kitty2: pallet_kitty2,
 	}
 );
 
