@@ -12,5 +12,5 @@ Bài tập thực hành 3: Pallet coupling
 
 3. DNA cần được sinh ra random (Optional)
 + Khi thực hiện tạo kitty thì dna sẽ sinh ra ngẫu nhiên 
-+ Tham khảo: https://paritytech.github.io/substrate/latest/frame_support/traits/trait.Randomness.html
++ Tham khảo: https://paritytech.github.io/substrate/master/frame_support/traits/trait.Randomness.html
 + Lưu ý: sử dụng loosely coupling và implement trait

@@ -53,7 +53,7 @@ pallet-demo = { version = "4.0.0-dev", default-features = false, path = "../pall
 pallet-kitty = { version = "4.0.0-dev", default-features = false, path = "../pallets/kitty" }
 pallet-tightly-coupling = { version = "4.0.0-dev", default-features = false, path = "../pallets/tightly-coupling" }
 pallet-loosely-coupling = { version = "4.0.0-dev", default-features = false, path = "../pallets/loosely-coupling" }
-pallet-kitty2 = { version = "4.0.0-dev", default-features = false, path = "../pallets/kitty2" }
+
 
 
 
@@ -79,7 +79,6 @@ std = [
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-template/std",
-	"pallet-kitty/std",
 	"pallet-demo/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
@@ -97,7 +96,7 @@ std = [
 	"sp-version/std",
 	"pallet-tightly-coupling/std",
 	"pallet-loosely-coupling/std",
-	"pallet-kitty2/std",
+	"pallet-kitty/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

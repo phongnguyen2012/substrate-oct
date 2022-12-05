@@ -46,11 +46,12 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
-pub use pallet_template;
 pub use pallet_demo;
 pub use pallet_kitty;
-pub use pallet_kitty2;
+/// Import the template pallet.
+pub use pallet_template;
+
+
 // pub use pallet_tightly_coupling;
 
 /// An index to a block.
@@ -71,7 +72,6 @@ pub type Index = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
-
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -283,14 +283,20 @@ impl pallet_sudo::Config for Runtime {
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+parameter_types! {
+	pub const MaxKitty: u32 = 5;
+}
+
 impl pallet_kitty::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	//create_date kitty
+	// type CreateKitty = Timestamp;
+	type Currency = Balances;
+	type MaxOwned = MaxKitty;
+	type RandomKitty = RandomnessCollectiveFlip;
+	
 }
-impl pallet_kitty2::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	//create_date kitty2
-	type CreateKitty = Timestamp;
-}
+
 
 impl pallet_demo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -324,7 +330,6 @@ construct_runtime!(
 		Kitty: pallet_kitty,
 		TightlyCoupling: pallet_tightly_coupling,
 		LooselyCoupling: pallet_loosely_coupling,
-		Kitty2: pallet_kitty2,
 	}
 );
 

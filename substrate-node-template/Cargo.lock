@@ -3718,7 +3718,6 @@ dependencies = [
  "pallet-demo",
  "pallet-grandpa",
  "pallet-kitty",
- "pallet-kitty2",
  "pallet-loosely-coupling",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
@@ -3975,27 +3974,15 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-kitty2"
-version = "4.0.0-dev"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
+ "pallet-balances",
+ "pallet-randomness-collective-flip",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
