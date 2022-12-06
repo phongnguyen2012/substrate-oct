@@ -50,7 +50,7 @@ pub use pallet_demo;
 pub use pallet_kitty;
 /// Import the template pallet.
 pub use pallet_template;
-
+// pub use pallet_swap;
 
 // pub use pallet_tightly_coupling;
 
@@ -304,6 +304,13 @@ impl pallet_demo::Config for Runtime {
 impl pallet_tightly_coupling::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+
+
+// impl pallet_swap::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	// type SwapAction = Swap;
+	
+// }
 impl pallet_loosely_coupling::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IncreaseValue = TemplateModule;
@@ -330,6 +337,7 @@ construct_runtime!(
 		Kitty: pallet_kitty,
 		TightlyCoupling: pallet_tightly_coupling,
 		LooselyCoupling: pallet_loosely_coupling,
+		// Swap: pallet_swap,
 	}
 );
 

@@ -80,7 +80,13 @@ pub use super::*;
 	pub(super) type KittiesOwned<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<T::Hash, T::MaxOwned>, ValueQuery>;
 		// BoundedVec<T::Hash, T::MaxOwned>
+	#[pallet::storage]
+	#[pallet::getter(fn total_balance)]
+	pub(super) type TotalBalance<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u128, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn total_kitty)]
+	pub(super) type TotalKitty<T: Config> = StorageMap<_, Blake2_128Concat,T::AccountId, u32, ValueQuery>;
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -103,8 +109,8 @@ pub use super::*;
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
 		pub fn create_kitty(origin: OriginFor<T>, dna: Vec<u8>, price: BalanceOf<T>) -> DispatchResult {
-			let convert_price = price.saturated_into::<u64>();
-			 ensure!(convert_price > 100u64, Error::<T>::PriceTooLow);
+			let convert_price = price.saturated_into::<u128>();
+			 ensure!(convert_price > 100u128, Error::<T>::PriceTooLow);
 			
 			let owner = ensure_signed(origin)?;
 			let new_gender = Self::gen_gender(&dna)?;
@@ -129,14 +135,18 @@ pub use super::*;
 			let current_id = KittyId::<T>::get();
 
 			let next_id = current_id.checked_add(1).ok_or(ArithmeticError::Overflow)?;
+			let mut amount_kitty = TotalKitty::<T>::get(owner.clone());
+			let amount_kitty = amount_kitty + 1;
+			let mut balance_kitty = TotalBalance::<T>::get(owner.clone());
+			balance_kitty = balance_kitty + convert_price;
 			//why try_append is error when not use BanlanceOf
-			KittiesOwned::<T>::try_append(&owner, kitty.dna.clone()).map_err(|_| Error::<T>::TooManyOwned)?;
+			KittiesOwned::<T>::try_append(owner.clone(), kitty.dna.clone()).map_err(|_| Error::<T>::TooManyOwned)?;
 			// KittiesOwned::<T>::append(&owner, kitty.dna.clone());
-
-			Kitties::<T>::insert(kitty.dna.clone(), kitty);
-
+			TotalBalance::<T>::insert(owner.clone(), balance_kitty);
+			Kitties::<T>::insert(kitty.dna.clone(), kitty.clone());
+			TotalKitty::<T>::insert(owner.clone(), amount_kitty);
 			KittyId::<T>::put(next_id);
-			Self::deposit_event(Event::Created { kitty: dna, owner: owner.clone() });
+			
 
 			Ok(())
 		}
@@ -147,6 +157,7 @@ pub use super::*;
 			let from = ensure_signed(origin)?;
 			
 			let mut kitty = Kitties::<T>::get(&dna).ok_or(Error::<T>::NotKitty)?;
+
 			
 			ensure!(kitty.owner == from, Error::<T>::NotOwner);
 			ensure!(kitty.owner != to, Error::<T>::TransferToSelf);
@@ -155,6 +166,7 @@ pub use super::*;
 
 			if let Some(pos) = from_owned.iter().position(|ids| *ids == dna) {
 				from_owned.swap_remove(pos);
+				
 			}
 			else{
 				return Err(Error::<T>::NotKitty.into());
@@ -162,13 +174,25 @@ pub use super::*;
 
 			let mut to_owned = KittiesOwned::<T>::get(&to);
 			to_owned.try_push(dna.clone()).map_err(|_| Error::<T>::TooManyOwned)?;
+			let mut balance_from = TotalBalance::<T>::get(from.clone());
+			balance_from = balance_from - kitty.price.saturated_into::<u128>();
+
+			let mut balance_to = TotalBalance::<T>::get(to.clone());
+			balance_to = balance_to + kitty.price.saturated_into::<u128>();
+
+			let mut amount_from = TotalKitty::<T>::get(from.clone());
+			amount_from = amount_from - 1;
+			let mut amount_to = TotalKitty::<T>::get(to.clone());
+			amount_to = amount_to + 1;
 
 			kitty.owner = to.clone();
-
 			Kitties::<T>::insert(dna.clone(), kitty.clone());
 			KittiesOwned::<T>::insert(&from, from_owned);
 			KittiesOwned::<T>::insert(&to, to_owned);
-
+			TotalBalance::<T>::insert(from.clone(), balance_from);
+			TotalBalance::<T>::insert(to.clone(), balance_to);
+			TotalKitty::<T>::insert(from.clone(), amount_from);
+			TotalKitty::<T>::insert(to.clone(), amount_to);
 			Self::deposit_event(Event::Transferred { from, to, kitty: dna.clone() });
 
 			Ok(())

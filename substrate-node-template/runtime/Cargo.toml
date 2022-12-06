@@ -53,6 +53,7 @@ pallet-demo = { version = "4.0.0-dev", default-features = false, path = "../pall
 pallet-kitty = { version = "4.0.0-dev", default-features = false, path = "../pallets/kitty" }
 pallet-tightly-coupling = { version = "4.0.0-dev", default-features = false, path = "../pallets/tightly-coupling" }
 pallet-loosely-coupling = { version = "4.0.0-dev", default-features = false, path = "../pallets/loosely-coupling" }
+pallet-swap = { version = "4.0.0-dev", default-features = false, path = "../pallets/swap" }
 
 
 
