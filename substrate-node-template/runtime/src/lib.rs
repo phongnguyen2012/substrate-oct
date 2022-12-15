@@ -290,7 +290,7 @@ parameter_types! {
 impl pallet_kitty::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	//create_date kitty
-	// type CreateKitty = Timestamp;
+	type CreateKitty = Timestamp;
 	type Currency = Balances;
 	type MaxOwned = MaxKitty;
 	type RandomKitty = RandomnessCollectiveFlip;

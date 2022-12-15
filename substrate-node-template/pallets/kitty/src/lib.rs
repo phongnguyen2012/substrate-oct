@@ -19,20 +19,16 @@ pub type Id = u32;
 use sp_runtime::ArithmeticError;
 use sp_runtime::traits::Hash;
 use pallet_timestamp as Timestamp;
-use frame_support::traits::{ Get, Currency, Randomness};
+use frame_support::traits::{ Get, Currency, Randomness, Time};
+use frame_support::dispatch::fmt;
 use sp_runtime::SaturatedConversion;
 // use pallet_randomness_collective_flip as Random;
-pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-
 // use frame_support::dispatch::fmt::Debug;
 // use pallet_balances ;
 
-
-
+pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 #[frame_support::pallet]
 pub mod pallet {
-
 
 pub use super::*;
 	#[derive(TypeInfo, Encode, Decode, Clone, RuntimeDebug, PartialEq, Copy, MaxEncodedLen)]
@@ -41,16 +37,28 @@ pub use super::*;
 		Female,
 	}
 
-	#[derive(TypeInfo, Encode, Decode, Clone, RuntimeDebug, PartialEq)]
+	#[derive(TypeInfo, Encode, Decode, Clone, PartialEq)]
 	#[scale_info(skip_type_params(T))]
 	pub struct Kitty<T: Config> {
 		pub dna: T::Hash,
 		pub price: BalanceOf<T>,
 		pub gender: Gender,
 		pub owner: T::AccountId,
-		pub create_date: T::Moment,
+		pub create_date: u64,
 	}
 
+	impl<T: Config> fmt::Debug for Kitty<T> {
+		fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+			f.debug_struct("Kitty")
+			 .field("dna", &self.dna)
+			 .field("price", &self.price)
+			 .field("gender", &self.gender)
+			 .field("owner", &self.owner)
+			 .field("create_date", &self.create_date)
+			 .finish()
+		}
+	}
+	
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -58,12 +66,13 @@ pub use super::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + Timestamp::Config  {
+	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type Currency: Currency<Self::AccountId>;
 		type MaxOwned: Get<u32>;
 		type RandomKitty: Randomness<Self::Hash, Self::BlockNumber>;
+		type CreateKitty: Time;
 		// type Balance: ReservableCurrency<Self::AccountId>;
 	}
 
@@ -115,7 +124,7 @@ pub use super::*;
 			let owner = ensure_signed(origin)?;
 			let new_gender = Self::gen_gender(&dna)?;
 			let new_dna = Self::gen_random();
-			let now = <Timestamp::Pallet<T>>::get();
+			let now = T::CreateKitty::now().saturated_into::<u64>();
 			let kitty  = Kitty::<T> {
 				dna: new_dna.clone(),
 				owner: owner.clone(),

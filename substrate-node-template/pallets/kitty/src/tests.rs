@@ -2,22 +2,14 @@ use crate::{mock::*, Error};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn it_works_for_default_value() {
+fn test_create_kitty() {
 	new_test_ext().execute_with(|| {
 		// Dispatch a signed extrinsic.
-		assert_ok!(TemplateModule::do_something(RuntimeOrigin::signed(1), 42));
+		let dna: Vec<u8> = vec![1,2,3,4,5,6,7,8];
+		let price = 200u128;
+		let createkitty = Kitty::create_kitty(RuntimeOrigin::signed(1),dna ,price);
+		assert_ok!(createkitty);
 		// Read pallet storage and assert an expected result.
-		assert_eq!(TemplateModule::something(), Some(42));
-	});
-}
-
-#[test]
-fn correct_error_for_none_value() {
-	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
-		assert_noop!(
-			TemplateModule::cause_error(RuntimeOrigin::signed(1)),
-			Error::<Test>::NoneValue
-		);
+		assert_eq!(Kitty::kitty_id(), 1);
 	});
 }
