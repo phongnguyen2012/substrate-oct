@@ -96,6 +96,11 @@ pub use super::*;
 	#[pallet::storage]
 	#[pallet::getter(fn total_kitty)]
 	pub(super) type TotalKitty<T: Config> = StorageMap<_, Blake2_128Concat,T::AccountId, u32, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn kitty_owned)]
+	pub(super) type Owner<T: Config> = StorageMap<_, Blake2_128Concat,T::AccountId, Vec<T::Hash>, ValueQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -155,7 +160,7 @@ pub use super::*;
 			Kitties::<T>::insert(kitty.dna.clone(), kitty.clone());
 			TotalKitty::<T>::insert(owner.clone(), amount_kitty);
 			KittyId::<T>::put(next_id);
-			
+			Owner::<T>::append(kitty.owner.clone(), kitty.dna.clone());
 
 			Ok(())
 		}

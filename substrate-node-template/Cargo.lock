@@ -122,6 +122,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a913633b0c922e6b745072795f50d90ebea78ba31a57e2ac8c2fc7b50950949"
 
 [[package]]
+name = "array-bytes"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22f72e9d6fac4bc80778ea470b20197b88d28c292bb7d60c3fb099280003cd19"
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1680,7 +1686,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
  "Inflector",
- "array-bytes",
+ "array-bytes 4.1.0",
  "chrono",
  "clap",
  "comfy-table",
@@ -3972,6 +3978,7 @@ dependencies = [
 name = "pallet-kitty"
 version = "4.0.0-dev"
 dependencies = [
+ "array-bytes 6.0.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5269,7 +5276,7 @@ name = "sc-cli"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "chrono",
  "clap",
  "fdlimit",
@@ -5518,7 +5525,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
  "ahash",
- "array-bytes",
+ "array-bytes 4.1.0",
  "async-trait",
  "dyn-clone",
  "finality-grandpa",
@@ -5575,7 +5582,7 @@ name = "sc-keystore"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "async-trait",
  "parking_lot 0.12.1",
  "serde_json",
@@ -5590,7 +5597,7 @@ name = "sc-network"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "async-trait",
  "asynchronous-codec",
  "bitflags",
@@ -5701,7 +5708,7 @@ name = "sc-network-light"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "futures",
  "libp2p",
  "log",
@@ -5722,7 +5729,7 @@ name = "sc-network-sync"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "fork-tree",
  "futures",
  "libp2p",
@@ -5752,7 +5759,7 @@ name = "sc-network-transactions"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "futures",
  "hex",
  "libp2p",
@@ -5771,7 +5778,7 @@ name = "sc-offchain"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "bytes",
  "fnv",
  "futures",
@@ -6685,7 +6692,7 @@ name = "sp-core"
 version = "6.0.0"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
- "array-bytes",
+ "array-bytes 4.1.0",
  "base58",
  "bitflags",
  "blake2",
