@@ -41,3 +41,33 @@ fn test_transfer_kitty(){
 		assert_ok!(Kitty::transfer(RuntimeOrigin::signed(ALICE), BOB, dna_hash));
 	})
 }
+#[test]
+fn get_kitty(){
+	new_test_ext().execute_with(|| {
+		let ALICE =1;
+		let dna1: Vec<u8> = vec![98,68,7,8];
+		let price1 = 200u128;
+		let dna2: Vec<u8> = vec![53,97,89,7,8];
+		let price2 = 500u128;
+		let dna3: Vec<u8> = vec![35,82,90];
+		let price3 = 700u128;
+		let dna4: Vec<u8> = vec![30,96,37,88];
+		let price4 = 300u128;
+		System::set_block_number(300);
+		let kitty1 = Kitty::create_kitty(RuntimeOrigin::signed(ALICE),dna1 ,price1);
+		System::set_block_number(200);
+		let kitty2 = Kitty::create_kitty(RuntimeOrigin::signed(ALICE),dna2 ,price2);
+		System::set_block_number(400);
+		let kitty3 = Kitty::create_kitty(RuntimeOrigin::signed(ALICE),dna3 ,price3);
+		System::set_block_number(500);
+		let kitty4 = Kitty::create_kitty(RuntimeOrigin::signed(ALICE),dna4 ,price4);
+		
+		let list_kitty = Kitty::kitty_owned(ALICE);
+		println!("{:?}", list_kitty);
+
+		assert_eq!(Kitty::total_kitty(ALICE), 4);
+		//300+310+320+
+		assert_eq!(Kitty::total_balance(ALICE), 1700);
+
+	})
+}
