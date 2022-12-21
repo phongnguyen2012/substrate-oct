@@ -9,7 +9,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
-use pallet_template::DoSomething;
+
+use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -25,21 +26,23 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{
-		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
+		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Nothing, Randomness,
+		StorageInfo,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		IdentityFee, Weight,
+		IdentityFee, Weight, WeightToFeeCoefficient, WeightToFeeCoefficients,
+		WeightToFeePolynomial,
 	},
 	StorageValue,
 };
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
+// use pallet_contracts::Call as DefaultContractAccessWeight;
 pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier};
 #[cfg(any(feature = "std", test))]
@@ -133,7 +136,14 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
-/// The version information used to identify this runtime when compiled natively.
+pub const MILLICENTS: Balance = 1_000_000_000;
+pub const CENTS: Balance = 1_000 * MILLICENTS;
+pub const DOLLARS: Balance = 100 * CENTS;
+const fn deposit(items: u32, bytes: u32) -> Balance {
+	items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
+}
+const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
+
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
@@ -148,6 +158,7 @@ parameter_types! {
 	pub BlockWeights: frame_system::limits::BlockWeights =
 		frame_system::limits::BlockWeights::with_sensible_defaults(
 			(2u64 * WEIGHT_PER_SECOND).set_proof_size(u64::MAX),
+			// Weight::from_ref_time(6_000_000_000),
 			NORMAL_DISPATCH_RATIO,
 		);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
@@ -269,7 +280,7 @@ impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
 	type OperationalFeeMultiplier = ConstU8<5>;
-	type WeightToFee = IdentityFee<Balance>;
+	type WeightToFee = PolyWeightToFee;
 	type LengthToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = ConstFeeMultiplier<FeeMultiplier>;
 }
@@ -294,10 +305,29 @@ impl pallet_kitty::Config for Runtime {
 	type Currency = Balances;
 	type MaxOwned = MaxKitty;
 	type RandomKitty = RandomnessCollectiveFlip;
-	
+}
+impl pallet_utility::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type PalletsOrigin = OriginCaller;
+	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
-
+pub struct PolyWeightToFee;
+impl WeightToFeePolynomial for PolyWeightToFee {
+	type Balance = Balance;
+	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
+		// in Polkadot, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
+		let p = CENTS;
+		let q: u128 = 10 * ExtrinsicBaseWeight::get().ref_time() as u128;
+		smallvec![WeightToFeeCoefficient {
+			degree: 1,
+			negative: false,
+			coeff_frac: Perbill::from_rational(p % q, q),
+			coeff_integer: p / q,
+		}]
+	}
+}
 impl pallet_demo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
@@ -306,16 +336,36 @@ impl pallet_tightly_coupling::Config for Runtime {
 }
 
 
-// impl pallet_swap::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// 	// type SwapAction = Swap;
-	
-// }
 impl pallet_loosely_coupling::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IncreaseValue = TemplateModule;
 }
 // Create the runtime by composing the FRAME pallets that were previously configured.
+
+impl pallet_nicks::Config for Runtime {
+	// The Balances pallet implements the ReservableCurrency trait.
+	// `Balances` is defined in `construct_runtime!` macro.
+	type Currency = Balances;
+
+	// Set ReservationFee to a value.
+	type ReservationFee = ConstU128<100>;
+
+	// No action is taken when deposits are forfeited.
+	type Slashed = ();
+
+	// Configure the FRAME System Root origin as the Nick pallet admin.
+	// https://paritytech.github.io/substrate/master/frame_system/enum.RawOrigin.html#variant.Root
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+
+	// Set MinLength of nick name to a desired value.
+	type MinLength = ConstU32<8>;
+
+	// Set MaxLength of nick name to a desired value.
+	type MaxLength = ConstU32<32>;
+
+	// The ubiquitous event type.
+	type RuntimeEvent = RuntimeEvent;
+}
 construct_runtime!(
 	pub struct Runtime
 	where
@@ -329,6 +379,7 @@ construct_runtime!(
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
 		Balances: pallet_balances,
+		Utility: pallet_utility,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
@@ -337,7 +388,8 @@ construct_runtime!(
 		Kitty: pallet_kitty,
 		TightlyCoupling: pallet_tightly_coupling,
 		LooselyCoupling: pallet_loosely_coupling,
-		// Swap: pallet_swap,
+		Nicks: pallet_nicks,
+		
 	}
 );
 

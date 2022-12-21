@@ -16,13 +16,15 @@ use frame_system::pallet_prelude::*;
 use scale_info::TypeInfo;
 use sp_std::vec::Vec;
 pub type Id = u32;
-use frame_support::sp_runtime::{ArithmeticError, SaturatedConversion};
-use frame_support::sp_runtime::traits::Hash;
-use frame_support::traits::{ ReservableCurrency, Currency, Randomness, Time};
+use sp_runtime::ArithmeticError;
+use sp_runtime::traits::Hash;
+use pallet_timestamp as Timestamp;
+use frame_support::traits::{ Get, Currency, Randomness, Time};
 use frame_support::dispatch::fmt;
-use frame_support::dispatch::fmt::Debug;
+use sp_runtime::SaturatedConversion;
+// use pallet_randomness_collective_flip as Random;
+// use frame_support::dispatch::fmt::Debug;
 // use pallet_balances ;
-// use frame_system::GenesisConfig;
 
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 #[frame_support::pallet]
@@ -38,8 +40,8 @@ pub use super::*;
 	#[derive(TypeInfo, Encode, Decode, Clone, PartialEq)]
 	#[scale_info(skip_type_params(T))]
 	pub struct Kitty<T: Config> {
-		pub dna: Vec<u8>,
-		pub price: u64,
+		pub dna: T::Hash,
+		pub price: BalanceOf<T>,
 		pub gender: Gender,
 		pub owner: T::AccountId,
 		pub create_date: u64,
@@ -67,8 +69,7 @@ pub use super::*;
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-		// type Currency: Currency<Self::AccountId>;
-		type Currency: ReservableCurrency<Self::AccountId>;
+		type Currency: Currency<Self::AccountId>;
 		type MaxOwned: Get<u32>;
 		type RandomKitty: Randomness<Self::Hash, Self::BlockNumber>;
 		type CreateKitty: Time;
@@ -81,12 +82,12 @@ pub use super::*;
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_kitty)]
-	pub(super) type Kitties<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Kitty<T>, OptionQuery>;
+	pub(super) type Kitties<T: Config> = StorageMap<_, Blake2_128Concat, T::Hash, Kitty<T>, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_kitty_owned)]
 	pub(super) type KittiesOwned<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<Vec<u8>, T::MaxOwned>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<T::Hash, T::MaxOwned>, ValueQuery>;
 		// BoundedVec<T::Hash, T::MaxOwned>
 	#[pallet::storage]
 	#[pallet::getter(fn total_balance)]
@@ -98,13 +99,13 @@ pub use super::*;
 
 	#[pallet::storage]
 	#[pallet::getter(fn kitty_owned)]
-	pub(super) type Owner<T: Config> = StorageMap<_, Blake2_128Concat,T::AccountId, Vec<u8>, ValueQuery>;
+	pub(super) type Owner<T: Config> = StorageMap<_, Blake2_128Concat,T::AccountId, Vec<T::Hash>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		Created { kitty: Vec<u8>, owner: T::AccountId },
-		Transferred { from: T::AccountId, to: T::AccountId, kitty: Vec<u8> },
+		Transferred { from: T::AccountId, to: T::AccountId, kitty: T::Hash },
 	}
 
 	// Errors inform users that something went wrong.
@@ -117,53 +118,20 @@ pub use super::*;
 		TransferToSelf,
 		PriceTooLow,
 	}
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config> {
-		pub genesis_kitty: Vec<Vec<u8>>,
-		pub owner: Option<T::AccountId>,
-		pub price: u64,
-		pub genesis_date: u64,
-	}
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> GenesisConfig<T> {
-			GenesisConfig {
-				genesis_kitty: Vec::new(),
-				owner: Default::default(),
-				price: 0,
-				genesis_date: 0,
-			}
-		}
-		
-	}
-	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
-		fn build(&self) {
-			for item in self.genesis_kitty.iter(){
-				let kitty = Kitty {
-					dna: vec![12,13,14,16,14, 56,89,89],
-					price: 200u32.into(),
-					owner: self.owner.clone().unwrap(),
-					create_date: self.genesis_date,
-					gender: Gender::Female
-				};
-				Kitties::<T>::insert(item, kitty);
-			}
-		}
-	}
+	
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn create_kitty(origin: OriginFor<T>, dna: Vec<u8>, price: u64) -> DispatchResult {
+		pub fn create_kitty(origin: OriginFor<T>, dna: Vec<u8>, price: BalanceOf<T>) -> DispatchResult {
 			let convert_price = price.saturated_into::<u128>();
 			 ensure!(convert_price > 100u128, Error::<T>::PriceTooLow);
 			
 			let owner = ensure_signed(origin)?;
 			let new_gender = Self::gen_gender(&dna)?;
-			// let new_dna = Self::gen_random();
+			let new_dna = Self::gen_random();
 			let now = T::CreateKitty::now().saturated_into::<u64>();
 			let kitty  = Kitty::<T> {
-				dna: dna.clone(),
+				dna: new_dna.clone(),
 				owner: owner.clone(),
 				price: price ,
 				gender: new_gender,
@@ -176,7 +144,7 @@ pub use super::*;
 			
 			//check kitty is not duplicate
 			
-			ensure!(!Kitties::<T>::contains_key(kitty.dna.clone()), Error::<T>::DuplicateKitty);
+			ensure!(!Kitties::<T>::contains_key(kitty.dna), Error::<T>::DuplicateKitty);
 
 			let current_id = KittyId::<T>::get();
 
@@ -186,19 +154,19 @@ pub use super::*;
 			let mut balance_kitty = TotalBalance::<T>::get(owner.clone());
 			balance_kitty = balance_kitty + convert_price;
 			//why try_append is error when not use BanlanceOf
-			// KittiesOwned::<T>::append(owner.clone(), kitty.dna.clone());
+			KittiesOwned::<T>::try_append(owner.clone(), kitty.dna.clone()).map_err(|_| Error::<T>::TooManyOwned)?;
 			// KittiesOwned::<T>::append(&owner, kitty.dna.clone());
 			TotalBalance::<T>::insert(owner.clone(), balance_kitty);
-			Kitties::<T>::insert(dna.clone(), kitty.clone());
+			Kitties::<T>::insert(kitty.dna.clone(), kitty.clone());
 			TotalKitty::<T>::insert(owner.clone(), amount_kitty);
 			KittyId::<T>::put(next_id);
-			// Owner::<T>::append(kitty.owner.clone(), kitty.dna.clone());
+			Owner::<T>::append(kitty.owner.clone(), kitty.dna.clone());
 
 			Ok(())
 		}
 
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, dna: Vec<u8>) -> DispatchResult {
+		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, dna: T::Hash) -> DispatchResult {
 			 
 			let from = ensure_signed(origin)?;
 			
@@ -244,7 +212,7 @@ pub use super::*;
 			Ok(())
 		}
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn update_price(origin: OriginFor<T>, dna:Vec<u8>, price: u64) -> DispatchResult {
+		pub fn update_price(origin: OriginFor<T>, dna: T::Hash, price: BalanceOf<T>) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			let mut kitty = Kitties::<T>::get(&dna).ok_or(Error::<T>::NotKitty)?;
 			

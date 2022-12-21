@@ -57,6 +57,26 @@ pub mod pallet {
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
 	}
+	// Test Genesis Configuration
+	#[pallet::genesis_config]
+	pub struct GenesisConfig {
+		pub value: u32,
+	}
+
+	#[cfg(feature = "std")]
+	impl Default for GenesisConfig {
+		fn default() -> Self {
+			Self {
+				value: 10,
+			}
+		}
+	}
+	#[pallet::genesis_build]
+	impl<T: Config> GenesisBuild<T> for GenesisConfig {
+		fn build(&self) {
+			Something::<T>::put(&self.value);
+		}
+	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
@@ -102,7 +122,7 @@ pub mod pallet {
 	}
 }
 //use tighly coupling pallets
-impl <T: Config> Pallet<T> {
+impl<T: Config> Pallet<T> {
 	// Public immutables can be declared in the pallet implementation block.
 	// This allows other pallets to query the state of the pallet.
 	pub fn is_something(something: u32) -> bool {
@@ -116,17 +136,12 @@ impl <T: Config> Pallet<T> {
 //use loosely coupling pallets
 pub trait DoSomething {
 	fn increase_value(value: u32) -> u32;
-} 
-impl <T: Config> DoSomething for Pallet<T> {
+}
+impl<T: Config> DoSomething for Pallet<T> {
 	fn increase_value(value: u32) -> u32 {
-		
 		let old = <Something<T>>::get().unwrap_or(0);
 		let new = old.checked_add(value).unwrap_or(0);
 		<Something<T>>::put(new);
 		new
-		
 	}
 }
-	
-	
-
