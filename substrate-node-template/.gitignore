@@ -15,3 +15,7 @@
 # direnv cache
 .direnv
 **/substrate-ui-template-ts/
+**/**/node_modules/
+**/node_modules/
+**/yarn.lock
+**/**/yarn.lock
