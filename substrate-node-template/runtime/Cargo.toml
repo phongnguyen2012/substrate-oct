@@ -102,6 +102,7 @@ std = [
 	"pallet-kitty/std",
 	"pallet-nicks/std",
 	"pallet-utility/std",
+	#"pallet-swap/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

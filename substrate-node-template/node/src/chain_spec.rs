@@ -4,11 +4,10 @@ use node_template_runtime::{
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public, H256};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -53,7 +52,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
 				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -161,9 +160,8 @@ fn testnet_genesis(
 		template_module: TemplateModuleConfig { value: 221u32 },
 		
 		kitty: KittyConfig {
-			genesis_kitty: vec![b"nguyenvanteo".as_slice().to_vec()],
+			genesis_kitty: vec![H256::random(), H256::random(), H256::random(), H256::random()],
 			owner: Some(get_account_id_from_seed::<sr25519::Public>("Alice")),
-			price: 300,
 			genesis_date: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64,
 		},
 	}

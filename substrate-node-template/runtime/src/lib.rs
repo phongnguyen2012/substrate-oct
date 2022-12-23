@@ -294,6 +294,9 @@ impl pallet_sudo::Config for Runtime {
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+// impl pallet_swap::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// }
 parameter_types! {
 	pub const MaxKitty: u32 = 5;
 }
@@ -389,6 +392,7 @@ construct_runtime!(
 		TightlyCoupling: pallet_tightly_coupling,
 		LooselyCoupling: pallet_loosely_coupling,
 		Nicks: pallet_nicks,
+		// Swap: pallet_swap,
 		
 	}
 );
