@@ -124,6 +124,7 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		pub genesis_kitty: Vec<T::Hash>,
+		pub price: u64,
 		pub owner: Option<T::AccountId>,
 		pub genesis_date: u64,
 	}
@@ -132,6 +133,7 @@ pub mod pallet {
 		fn default() -> GenesisConfig<T> {
 			GenesisConfig {
 				genesis_kitty: vec![],
+				price: 0u64,
 				owner: Default::default(),
 				genesis_date: 0u64,
 			}

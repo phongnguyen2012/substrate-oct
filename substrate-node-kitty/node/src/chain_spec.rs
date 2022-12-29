@@ -4,11 +4,11 @@ use node_template_runtime::{
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public, H256};
+use sp_core::{sr25519, Pair, Public, H256, crypto::UncheckedInto};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::time::{SystemTime, UNIX_EPOCH};
-
+use hex_literal::hex;
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -161,8 +161,70 @@ fn testnet_genesis(
 		
 		kitty: KittyConfig {
 			genesis_kitty: vec![H256::random(), H256::random(), H256::random(), H256::random()],
+			price: 200u64,
 			owner: Some(get_account_id_from_seed::<sr25519::Public>("Alice")),
 			genesis_date: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64,
 		},
 	}
+}
+
+pub fn custom_testnet_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Local Testnet",
+		// ID
+		"local_testnet",
+		ChainType::Local,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				vec![
+					(
+						/* AuraId SR25519 */
+						hex!["1cb47e9d4b56eaa032c4e676b1c1251ce3df1f6f4ea2c65fc83dd7728d03e96a"].unchecked_into(),
+						/* GrandpaId ED25519 */
+						hex!["db5e90e586b302b4ef31e89b892697e22dcc26d8d58a957268dea92882975777"].unchecked_into()
+					),
+					(
+						/* AuraId SR25519 */
+						hex!["5a502ec1e01e6d55c19ad2957c5dbc747ea061545bd0d0a669d0c684f158f03d"].unchecked_into(),
+						/* GrandpaId ED25519 */
+						hex!["6db275c17cd107773743ade77c8a4d14ea4e8d71451bf3f6650add0b0492283e"].unchecked_into()
+					),
+				],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Pre-funded accounts
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+				],
+				true,
+			)
+		},
+		// Bootnodes
+		vec![],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// Properties
+		None,
+		None,
+		// Extensions
+		None,
+	))
 }

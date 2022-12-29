@@ -1,0 +1,10 @@
+{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"author_insertKey",
+    "params": [
+        "gran",
+        "wait economy flip turtle letter roast novel midnight truly spatial broccoli",
+        "0x6db275c17cd107773743ade77c8a4d14ea4e8d71451bf3f6650add0b0492283e"
+    ]
+}
