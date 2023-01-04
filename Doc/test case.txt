@@ -1,0 +1,5 @@
+test case
+
+cargo test -p pallet-kitty --lib --tests
+
+cargo test -p pallet-kitty --lib --tests -- --nocapture

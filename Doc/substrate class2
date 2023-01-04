@@ -1,0 +1,17 @@
+[Substrate Course OCT]  Submit Exercice
+
+ Cho một bài toán như sau:  Thiết kế pallet-kitties
+Các yêu cầu như sau: 
+ + Tạo 1 pallet mới có tên pallet-kitties
+ Gợi ý kiểu dữ liệu:
+ struct Kitty {
+             dna: Vec<u8>,
+             owner: AccountId
+             price: u32,
+             gender: Gender,
+}
++ Định nghĩa giới tính gồm có Male, Female
++ User có thể tạo kitty
++ Có thể chuyển đổi owner của kitty này sang một chủ khác
++ Giới tính dựa vào độ dài của dna ( nêú độ dài chẵn -> Male, độ dài lẽ -> Female)
++ Storage on chain cần có: Lưu số lượng Kitty hiện tại bằng StorageValue, Lưu thông tin của Kitty: map (dna => struct Kitty), owner sở hữu bao nhiêu kitty: map(accountId => vec<dna>)

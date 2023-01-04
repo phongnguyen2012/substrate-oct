@@ -1,0 +1,10 @@
+{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"author_insertKey",
+    "params": [
+        "aura",
+        "bag swing comic double cradle clump army blur grass patrol amount vapor",
+        "0x2d9158835ba2fa5be1846661b1771efb0f2b52f2219abc2eed733b1e165d1f06"
+    ]
+}

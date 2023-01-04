@@ -1,0 +1,10 @@
+{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"author_insertKey",
+    "params": [
+        "aura",
+        "wait economy flip turtle letter roast novel midnight truly spatial broccoli coach",
+        "0x5a502ec1e01e6d55c19ad2957c5dbc747ea061545bd0d0a669d0c684f158f03d"
+    ]
+}
