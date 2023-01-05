@@ -20,7 +20,7 @@ pub mod weights;
 
 use codec::{Decode, Encode};
 use frame_support::traits::{
-	tokens::{AttributeNamespace, Locker},
+	tokens::*,
 	BalanceStatus::Reserved,
 	Currency, EnsureOriginWithArg, ReservableCurrency,
 };
