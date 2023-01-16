@@ -1,0 +1,60 @@
+.App {
+  text-align: center;
+}
+
+form {
+  width: 100%;
+  margin: 0.5rem auto;
+  align-items: center;
+}
+
+/* label,
+input {
+   padding: 0.8rem;
+  outline: none;
+  font-size: inherit;
+  font-family: inherit;
+  margin-top: 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid lightgrey;
+  width: 10%;
+} */
+
+input, label
+button {
+  /* display: block; */
+  padding: 0.8rem;
+  outline: none;
+  font-size: inherit;
+  font-family: inherit;
+  margin-top: 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid lightgrey;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  width: 5%;
+  color: rgb(67, 20, 236);
+
+}
+
+.error-container {
+  border: 1px dashed lightgray;
+  padding: 1rem;
+  width: 100%;
+}
+ul {
+  list-style-position: inside;
+  color: lightcoral;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  padding: 0.5rem;
+
+}
+li{
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+}
